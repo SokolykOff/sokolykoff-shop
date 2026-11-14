@@ -1,0 +1,192 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+
+{% block content %}
+  <div class="Middle Middle_top">
+    <div class="Middle-top" style="margin-bottom:36px;padding:28px 0;background:linear-gradient(135deg,#0f172a,#1e3a8a);color:#fff;">
+      <div class="wrap">
+        <div class="Middle-header">
+          <h1 class="Middle-title" style="color:#fff;border-left-color:#38bdf8;">Каталог SokolykOff Shop</h1>
+          <ul class="breadcrumbs Middle-breadcrumbs">
+            <li class="breadcrumbs-item"><a href="/" style="color:#93c5fd;">Главная</a></li>
+            <li class="breadcrumbs-item breadcrumbs-item_current"><span style="color:#fff;">Каталог</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="Section Section_column Section_columnLeft">
+      <div class="wrap">
+        <div class="Section-column">
+          <div class="Section-columnSection" style="background:#fff;padding:24px;border-radius:16px;border:1px solid #e2e8f0;box-shadow:0 4px 12px rgba(0,0,0,0.03);">
+            <header class="Section-header" style="margin-bottom:18px;">
+              <strong class="Section-title">Умный фильтр</strong>
+            </header>
+            <div class="Section-columnContent">
+              <form class="form" style="margin-top:0;" @submit.prevent="getCatalogs(1)">
+                <div class="form-group">
+                  <label class="form-label" style="font-weight:600;color:#334155;">Поиск по смыслу или бюджету</label>
+                  <input class="form-input form-input_full" id="title" name="title" type="text" autocomplete="off"
+                         v-model="filter.name" placeholder="Напр: ноутбук до 700"
+                         style="border-radius:10px;min-height:44px;font-size:14px;padding:8px 14px;min-width:0;"/>
+                </div>
+
+                <div class="form-group" style="margin-top:18px;">
+                  <label class="form-label" style="font-weight:600;color:#334155;">Диапазон цены ($)</label>
+                  <div style="display:flex;gap:10px;align-items:center;">
+                    <input type="number" name="minPrice" v-model="filter.minPrice" placeholder="От $" min="0"
+                           style="width:100%;padding:8px 12px;border:1px solid #cbd5e1;border-radius:10px;font-size:14px;"/>
+                    <span style="color:#94a3b8;">—</span>
+                    <input type="number" name="maxPrice" v-model="filter.maxPrice" placeholder="До $" min="0"
+                           style="width:100%;padding:8px 12px;border:1px solid #cbd5e1;border-radius:10px;font-size:14px;"/>
+                  </div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">
+                    <button type="button" class="btn btn_sm btn_default" style="padding:4px 10px;font-size:12px;" @click="filter.minPrice=0;filter.maxPrice=200;getCatalogs(1)">До $200</button>
+                    <button type="button" class="btn btn_sm btn_default" style="padding:4px 10px;font-size:12px;" @click="filter.minPrice=0;filter.maxPrice=500;getCatalogs(1)">До $500</button>
+                    <button type="button" class="btn btn_sm btn_default" style="padding:4px 10px;font-size:12px;" @click="filter.minPrice=0;filter.maxPrice=5000;filter.name='';getCatalogs(1)">Сбросить</button>
+                  </div>
+                </div>
+
+                <div class="form-group" style="margin-top:18px;">
+                  <label class="toggle">
+                    <input type="checkbox" name="available" v-model="filter.available"/>
+                    <span class="toggle-box"></span>
+                    <span class="toggle-text" style="font-size:14px;">Только в наличии</span>
+                  </label>
+                </div>
+                <div class="form-group" style="margin-top:12px;">
+                  <label class="toggle">
+                    <input type="checkbox" name="freeDelivery" v-model="filter.freeDelivery"/>
+                    <span class="toggle-box"></span>
+                    <span class="toggle-text" style="font-size:14px;">Бесплатная доставка</span>
+                  </label>
+                </div>
+                <div class="form-group" style="margin-top:20px;">
+                  <button type="submit" class="btn btn_primary" style="width:100%;border-radius:10px;">Применить фильтр</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="Section-columnSection" style="background:#fff;padding:24px;border-radius:16px;border:1px solid #e2e8f0;margin-top:20px;box-shadow:0 4px 12px rgba(0,0,0,0.03);">
+            <header class="Section-header" style="margin-bottom:14px;">
+              <strong class="Section-title">Теги экосистемы</strong>
+            </header>
+            <div class="Section-columnContent">
+              <div class="buttons">
+                <button v-for="tag in topTags" :key="tag.id" type="button"
+                        :class="['btn btn_sm', tag.selected ? 'btn_primary' : 'btn_default']"
+                        @click="setTag(tag.id)" style="border-radius:20px;font-size:12px;padding:5px 12px;">
+                  #${ tag.name }$
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="Section-content">
+          <div class="Sort" style="background:#fff;padding:14px 20px;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:24px;align-items:center;">
+            <div class="Sort-title" style="background:transparent;font-weight:700;color:#334155;">Сортировать по:</div>
+            <div class="Sort-variants" style="background:transparent;">
+              <div v-for="sort in sortRules" :key="sort.id" :id="sort.id" class="Sort-sortBy"
+                   :class="[selectedSort && sort.id === selectedSort.id ? `Sort-sortBy_${selectedSort.selected}` : null]"
+                   @click="setSort(sort.id)" style="cursor:pointer;font-weight:600;">
+                ${ sort.title }$
+              </div>
+            </div>
+          </div>
+
+          <div v-if="catalogCards.length === 0" style="background:#fff;padding:40px;border-radius:16px;text-align:center;border:1px solid #e2e8f0;">
+            <h3 style="margin-top:0;">По вашему запросу ничего не найдено</h3>
+            <p style="color:#64748b;">Попробуйте сбросить фильтры или увеличить максимальную цену.</p>
+            <button class="btn btn_primary" @click="filter.name='';filter.minPrice=0;filter.maxPrice=5000;getCatalogs(1)" style="border-radius:10px;margin-top:12px;">Показать все товары</button>
+          </div>
+
+          <div class="Cards">
+            <div v-for="card in catalogCards" class="Card" :key="card.id">
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:12px;">
+                  <span style="color:#f59e0b;font-weight:700;">★ ${ card.rating }$ (${ card.reviews }$)</span>
+                  <span v-if="card.freeDelivery" style="background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:10px;font-weight:600;">Беспл. доставка</span>
+                </div>
+                <a class="Card-picture" :href="`/product/${card.id}`" style="min-height:175px;max-height:175px;">
+                  <img :src="card.images[0].src" :alt="card.images[0].alt"/>
+                </a>
+                <strong class="Card-title" style="font-size:16px;font-weight:700;line-height:1.35;margin-top:12px;min-height:44px;border:none;">
+                  <a :href="`/product/${card.id}`" style="color:#0f172a;">${ card.title }$</a>
+                </strong>
+                <div style="font-size:13px;color:#64748b;margin-top:4px;line-height:1.4;height:38px;overflow:hidden;">
+                  ${ card.description }$
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:12px;border-top:1px solid #f1f5f9;">
+                <span style="font-size:22px;font-weight:800;color:#0284c7;">$${ card.price }$</span>
+                <button class="btn btn_primary btn_sm" @click="addToBasket(card)" style="border-radius:10px;padding:8px 16px;">
+                  В корзину
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="Pagination" style="margin-top:40px;">
+            <div class="Pagination-ins" style="background:transparent;">
+              <a class="Pagination-element Pagination-element_prev" @click.prevent="getCatalogs(1)" href="#">
+                <img src="/static/frontend/assets/img/icons/prevPagination.svg" alt="prev"/>
+              </a>
+              <a v-for="page in lastPage" class="Pagination-element" :class="{'Pagination-element_current': page == currentPage}" @click.prevent="getCatalogs(page)" href="#">
+                <span class="Pagination-text">${page}$</span>
+              </a>
+              <a class="Pagination-element Pagination-element_prev" @click.prevent="getCatalogs(lastPage)" href="#">
+                <img src="/static/frontend/assets/img/icons/nextPagination.svg" alt="next"/>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block mixins %}
+<script src="{% static 'frontend/assets/js/catalog.js' %}"></script>
+<script>
+  mix.methods.getCatalogs = function(page = 1) {
+    const PAGE_LIMIT = 20;
+    const tags = this.topTags.filter(tag => !!tag.selected).map(tag => tag.id);
+    this.getData("/api/catalog/", {
+      filter: {
+        name: this.filter.name || '',
+        minPrice: this.filter.minPrice || 0,
+        maxPrice: this.filter.maxPrice || 5000,
+        freeDelivery: this.filter.freeDelivery,
+        available: this.filter.available
+      },
+      currentPage: page,
+      category: this.category,
+      sort: this.selectedSort ? this.selectedSort.id : null,
+      sortType: this.selectedSort ? this.selectedSort.selected : null,
+      tags,
+      limit: PAGE_LIMIT
+    }).then(data => {
+      this.catalogCards = data.items;
+      this.currentPage = data.currentPage;
+      this.lastPage = data.lastPage;
+    });
+  };
+
+  mix.mounted = function() {
+    this.selectedSort = this.sortRules?.[1] ? { ...this.sortRules[1], selected: 'inc' } : null;
+    if (location.pathname.startsWith('/catalog/')) {
+      const cat = location.pathname.replace('/catalog/', '').replace('/', '');
+      this.category = cat.length ? Number(cat) : null;
+    }
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('filter')) {
+      this.filter.name = params.get('filter');
+    }
+    this.filter.minPrice = 0;
+    this.filter.maxPrice = 5000;
+    this.getCatalogs(1);
+    this.getTags();
+  };
+</script>
+{% endblock %}

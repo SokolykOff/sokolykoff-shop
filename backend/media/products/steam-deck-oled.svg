@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="450" viewBox="0 0 600 450" role="img" aria-label="Steam Deck OLED">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0b1220"/><stop offset="1" stop-color="#1e293b"/></linearGradient>
+<radialGradient id="glow" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#38bdf8" stop-opacity="0.38"/><stop offset="1" stop-color="#38bdf8" stop-opacity="0"/></radialGradient>
+<linearGradient id="scr" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#38bdf8" stop-opacity="0.55"/><stop offset="1" stop-color="#0b1220"/></linearGradient>
+<linearGradient id="beam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38bdf8" stop-opacity="0.5"/><stop offset="1" stop-color="#38bdf8" stop-opacity="0"/></linearGradient>
+<pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M30 0H0V30" fill="none" stroke="#94a3b8" stroke-opacity="0.07"/></pattern>
+</defs>
+<rect width="600" height="450" fill="url(#bg)"/><rect width="600" height="450" fill="url(#grid)"/>
+<ellipse cx="300" cy="215" rx="260" ry="190" fill="url(#glow)"/>
+<ellipse cx="300" cy="352" rx="170" ry="12" fill="#000" opacity="0.35"/>
+<g transform="translate(0 -6)"><rect x="115" y="160" width="370" height="120" rx="54" fill="#1e293b" stroke="#38bdf8" stroke-width="4"/><rect x="215" y="172" width="170" height="96" rx="10" fill="url(#scr)" stroke="#0f172a" stroke-width="4"/><circle cx="168" cy="205" r="20" fill="#0f172a" stroke="#e2e8f0" stroke-width="3"/><circle cx="432" cy="245" r="20" fill="#0f172a" stroke="#e2e8f0" stroke-width="3"/><path d="M150 242h36M168 224v36" stroke="#e2e8f0" stroke-width="7" stroke-linecap="round"/><circle cx="440" cy="205" r="7" fill="#38bdf8"/><circle cx="460" cy="225" r="7" fill="#e2e8f0"/></g>
+<rect x="28" y="26" width="62" height="30" rx="15" fill="#38bdf8" fill-opacity="0.16" stroke="#38bdf8" stroke-opacity="0.8"/>
+<text x="59.0" y="46" font-family="'Segoe UI',Arial,sans-serif" font-size="13" font-weight="700" fill="#38bdf8" text-anchor="middle">1 TB</text>
+<text x="300" y="392" font-family="'Segoe UI',Arial,sans-serif" font-size="26" font-weight="700" fill="#f8fafc" text-anchor="middle">Steam Deck OLED</text>
+<text x="300" y="420" font-family="'Segoe UI',Arial,sans-serif" font-size="16" fill="#94a3b8" text-anchor="middle">Портативная консоль</text>
+<text x="572" y="440" font-family="'Segoe UI',Arial,sans-serif" font-size="10" fill="#64748b" text-anchor="end">SokolykOff Shop</text>
+</svg>

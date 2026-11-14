@@ -1,0 +1,51 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+
+{% block content %}
+  <div class="Middle Middle_top">
+    <div class="Middle-top" style="margin-bottom:40px;padding:35px 0;background:linear-gradient(135deg,#0f172a,#1e3a8a);color:#fff;">
+      <div class="wrap">
+        <div class="Middle-header">
+          <h1 class="Middle-title" style="color:#fff;border-left-color:#00d2ff;">🔥 Горячие Акции SokolykOff Shop (-20%)</h1>
+          <ul class="breadcrumbs Middle-breadcrumbs">
+            <li class="breadcrumbs-item"><a href="/" style="color:#93c5fd;">Главная</a></li>
+            <li class="breadcrumbs-item breadcrumbs-item_current"><span style="color:#fff;">Акции</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="Section">
+      <div class="wrap">
+        <div class="Cards">
+          <div v-for="card in salesCards" class="Card" style="border-radius:16px;overflow:hidden;position:relative;padding:24px;display:flex;flex-direction:column;justify-content:space-between;">
+            <div style="position:absolute;top:14px;left:14px;background:#ef4444;color:#fff;font-weight:800;font-size:12px;padding:5px 12px;border-radius:20px;z-index:10;">
+              🔥 СКИДКА -20%
+            </div>
+            <div style="position:absolute;top:14px;right:14px;background:#eff6ff;color:#1d4ed8;font-weight:600;font-size:12px;padding:5px 10px;border-radius:20px;z-index:10;">
+              📅 ${ card.dateFrom }$ — ${ card.dateTo }$
+            </div>
+            <a class="Card-picture" :href="`/product/${card.id}`" style="margin-top:20px;height:200px;">
+              <img :src="card.images[0].src" :alt="card.images[0].alt" style="max-height:180px;width:auto;object-fit:contain;border-radius:10px;"/>
+            </a>
+            <div class="Card-content" style="text-align:left;margin-top:16px;">
+              <strong class="Card-title" style="font-size:17px;font-weight:700;line-height:1.35;min-height:46px;">
+                <a :href="`/product/${card.id}`" style="color:#0f172a;">${ card.title }$</a>
+              </strong>
+              <div style="display:flex;align-items:baseline;gap:12px;margin-top:14px;">
+                <span style="font-size:24px;font-weight:800;color:#16a34a;">$${ card.salePrice }$</span>
+                <s style="font-size:16px;color:#94a3b8;">$${ card.price }$</s>
+              </div>
+              <a :href="`/product/${card.id}`" class="btn btn_primary" style="width:100%;margin-top:14px;border-radius:10px;padding:10px;">
+                Забрать по акции
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block mixins %}
+<script src="{% static 'frontend/assets/js/sales.js' %}"></script>
+{% endblock %}

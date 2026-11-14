@@ -1,0 +1,154 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+
+{% block content %}
+  <div class="Middle Middle_top">
+    <div class="Middle-top" style="margin-bottom:40px;padding:30px 0;background:linear-gradient(135deg,#0f172a,#1e3a8a);color:#fff;">
+      <div class="wrap">
+        <div class="Middle-header">
+          <h1 class="Middle-title" style="color:#fff;border-left-color:#38bdf8;">Настройки профиля и безопасность</h1>
+          <ul class="breadcrumbs Middle-breadcrumbs">
+            <li class="breadcrumbs-item"><a href="/" style="color:#93c5fd;">Главная</a></li>
+            <li class="breadcrumbs-item"><a href="/account/" style="color:#93c5fd;">Кабинет</a></li>
+            <li class="breadcrumbs-item breadcrumbs-item_current"><span style="color:#fff;">Профиль</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="Section Section_column Section_columnLeft">
+      <div class="wrap">
+        <div class="Section-column">
+          <div class="Section-columnSection" style="background:#fff;padding:22px;border-radius:16px;border:1px solid #e2e8f0;">
+            <header class="Section-header" style="margin-bottom:15px;">
+              <strong class="Section-title">Навигация</strong>
+            </header>
+            <div class="Section-columnContent">
+              <div class="NavigateProfile">
+                <ul class="menu menu_vt">
+                  <li class="menu-item"><a class="menu-link" href="/account/">Сводка кабинета</a></li>
+                  <li class="menu-item menu-item_ACTIVE"><a class="menu-link" href="/profile/">Профиль и пароль</a></li>
+                  <li class="menu-item"><a class="menu-link" href="/history-order/">История заказов</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="Section-content">
+          <div class="Profile">
+            <div class="row" style="gap:24px;">
+              <!-- Блок 1: Личные данные -->
+              <div class="row-block" style="background:#fff;padding:28px;border-radius:16px;border:1px solid #e2e8f0;">
+                <h3 style="margin-top:0;margin-bottom:20px;">Личные данные</h3>
+                <form action="" @submit.prevent="changeProfile">
+                  <div class="form-group">
+                    <label class="form-label" for="avatar">Аватар профиля (до 2 МБ)</label>
+                    <div v-if="!avatar || !avatar.src" class="Profile-avatar Profile-avatar_noimg" style="border-radius:12px;height:180px;">
+                      <label class="Profile-fileLabel" for="avatar">Загрузить фото</label>
+                      <input class="Profile-file form-input" @change="setAvatar" @click="$event.target.value = null" type="file" id="avatar" name="avatar"/>
+                    </div>
+                    <div v-else class="Profile-img" @click="clearAvatar" style="border-radius:12px;">
+                      <img :src="avatar.src" :alt="avatar.alt" style="max-height:140px;border-radius:12px;"/>
+                      <div style="font-size:12px;color:#64748b;margin-top:6px;">Нажмите на фото, чтобы заменить</div>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="name">Ф.И.О.</label>
+                    <input class="form-input" id="name" name="name" type="text" required v-model="fullName" style="border-radius:10px;"/>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="phone">Телефон</label>
+                    <input class="form-input" id="phone" name="phone" type="tel" required v-model="phone" placeholder="+79990000000" style="border-radius:10px;"/>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="mail">E-mail</label>
+                    <input class="form-input" id="mail" name="mail" type="email" required v-model="email" style="border-radius:10px;"/>
+                  </div>
+                  <div class="form-group">
+                    <button class="btn btn_primary" type="submit" style="border-radius:10px;width:100%;">Сохранить профиль</button>
+                  </div>
+                </form>
+              </div>
+
+              <!-- Блок 2: Смена пароля + Удаление аккаунта -->
+              <div class="row-block">
+                <div style="background:#fff;padding:28px;border-radius:16px;border:1px solid #e2e8f0;margin-bottom:24px;">
+                  <h3 style="margin-top:0;margin-bottom:20px;">🔑 Изменить пароль</h3>
+                  <form action="" @submit.prevent="changePassword">
+                    <div class="form-group">
+                      <label class="form-label" for="passwordCurrent">Текущий пароль</label>
+                      <input class="form-input" id="passwordCurrent" name="passwordCurrent" type="password" placeholder="Введите текущий пароль" v-model="passwordCurrent" style="border-radius:10px;"/>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label" for="password">Новый пароль</label>
+                      <input class="form-input" id="password" name="password" type="password" placeholder="Минимум 4 символа" v-model="password" style="border-radius:10px;"/>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label" for="passwordReply">Подтверждение нового пароля</label>
+                      <input class="form-input" id="passwordReply" name="passwordReply" type="password" placeholder="Повторите новый пароль" v-model="passwordReply" style="border-radius:10px;"/>
+                    </div>
+                    <div class="form-group">
+                      <button class="btn btn_success" type="submit" style="border-radius:10px;width:100%;">Обновить пароль</button>
+                    </div>
+                  </form>
+                </div>
+
+                <!-- Блок 3: Удаление аккаунта (GDPR 2026) -->
+                <div style="background:#fff1f2;padding:24px;border-radius:16px;border:1px solid #fecdd3;">
+                  <h3 style="margin-top:0;margin-bottom:10px;color:#be123c;font-size:18px;">⚠️ Управление аккаунтом</h3>
+                  <p style="font-size:13.5px;color:#881337;margin-bottom:16px;line-height:1.45;">
+                    Вы можете в любой момент удалить свой аккаунт и персональные данные с платформы SokolykOff Shop.
+                  </p>
+                  <button type="button" class="btn btn_danger" onclick="deleteMyAccount()" style="border-radius:10px;width:100%;background:#e11d48;border-color:#e11d48;">
+                    🗑 Удалить мой аккаунт
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block mixins %}
+<script src="{% static 'frontend/assets/js/profile.js' %}"></script>
+<script>
+  mix.methods.changePassword = function() {
+    if (!this.passwordCurrent.trim() || !this.password.trim() || !this.passwordReply.trim()) {
+      alert('Пожалуйста, заполните текущий и новый пароль!');
+      return;
+    }
+    if (this.password !== this.passwordReply) {
+      alert('Новый пароль и подтверждение не совпадают!');
+      return;
+    }
+    this.postData('/api/profile/password/', {
+      passwordCurrent: this.passwordCurrent,
+      password: this.password
+    }).then(() => {
+      alert('Пароль успешно изменен!');
+      this.passwordCurrent = '';
+      this.password = '';
+      this.passwordReply = '';
+    }).catch(() => {
+      alert('Ошибка: неверный текущий пароль или слишком простой новый пароль!');
+    });
+  };
+
+  function deleteMyAccount() {
+    if (!confirm('Вы действительно хотите удалить свой аккаунт SokolykOff Shop? Вы будете разавторизованы.')) {
+      return;
+    }
+    fetch('/api/profile/delete/', { method: 'POST', headers: { 'X-CSRFToken': decodeURIComponent((document.cookie.split('; ').find(function (c) { return c.startsWith('csrftoken='); }) || '=').split('=')[1]) } })
+      .then(r => {
+        if (r.ok) {
+          alert('Ваш аккаунт успешно удален.');
+          location.assign('/');
+        } else {
+          alert('Ошибка при удалении аккаунта');
+        }
+      });
+  }
+</script>
+{% endblock %}

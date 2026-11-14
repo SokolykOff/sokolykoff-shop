@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="450" viewBox="0 0 600 450" role="img" aria-label="DJI Spark">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0b1220"/><stop offset="1" stop-color="#1e293b"/></linearGradient>
+<radialGradient id="glow" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#38bdf8" stop-opacity="0.38"/><stop offset="1" stop-color="#38bdf8" stop-opacity="0"/></radialGradient>
+<linearGradient id="scr" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#38bdf8" stop-opacity="0.55"/><stop offset="1" stop-color="#0b1220"/></linearGradient>
+<linearGradient id="beam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38bdf8" stop-opacity="0.5"/><stop offset="1" stop-color="#38bdf8" stop-opacity="0"/></linearGradient>
+<pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M30 0H0V30" fill="none" stroke="#94a3b8" stroke-opacity="0.07"/></pattern>
+</defs>
+<rect width="600" height="450" fill="url(#bg)"/><rect width="600" height="450" fill="url(#grid)"/>
+<ellipse cx="300" cy="215" rx="260" ry="190" fill="url(#glow)"/>
+<ellipse cx="300" cy="352" rx="170" ry="12" fill="#000" opacity="0.35"/>
+<g transform="translate(0 -6)"><line x1="300" y1="215" x2="190" y2="150" stroke="#64748b" stroke-width="8" stroke-linecap="round"/><circle cx="190" cy="150" r="34" fill="#38bdf8" opacity="0.18" stroke="#38bdf8" stroke-width="2"/><line x1="156" y1="150" x2="224" y2="150" stroke="#e2e8f0" stroke-width="4" stroke-linecap="round"/><line x1="300" y1="215" x2="410" y2="150" stroke="#64748b" stroke-width="8" stroke-linecap="round"/><circle cx="410" cy="150" r="34" fill="#38bdf8" opacity="0.18" stroke="#38bdf8" stroke-width="2"/><line x1="376" y1="150" x2="444" y2="150" stroke="#e2e8f0" stroke-width="4" stroke-linecap="round"/><line x1="300" y1="215" x2="190" y2="280" stroke="#64748b" stroke-width="8" stroke-linecap="round"/><circle cx="190" cy="280" r="34" fill="#38bdf8" opacity="0.18" stroke="#38bdf8" stroke-width="2"/><line x1="156" y1="280" x2="224" y2="280" stroke="#e2e8f0" stroke-width="4" stroke-linecap="round"/><line x1="300" y1="215" x2="410" y2="280" stroke="#64748b" stroke-width="8" stroke-linecap="round"/><circle cx="410" cy="280" r="34" fill="#38bdf8" opacity="0.18" stroke="#38bdf8" stroke-width="2"/><line x1="376" y1="280" x2="444" y2="280" stroke="#e2e8f0" stroke-width="4" stroke-linecap="round"/><ellipse cx="300" cy="215" rx="58" ry="34" fill="#1e293b" stroke="#38bdf8" stroke-width="4"/><circle cx="300" cy="235" r="14" fill="#0f172a" stroke="#e2e8f0" stroke-width="3"/><circle cx="300" cy="235" r="5" fill="#38bdf8"/></g>
+<rect x="28" y="26" width="116" height="30" rx="15" fill="#38bdf8" fill-opacity="0.16" stroke="#38bdf8" stroke-opacity="0.8"/>
+<text x="86.0" y="46" font-family="'Segoe UI',Arial,sans-serif" font-size="13" font-weight="700" fill="#38bdf8" text-anchor="middle">AI-трекинг</text>
+<text x="300" y="392" font-family="'Segoe UI',Arial,sans-serif" font-size="26" font-weight="700" fill="#f8fafc" text-anchor="middle">DJI Spark</text>
+<text x="300" y="420" font-family="'Segoe UI',Arial,sans-serif" font-size="16" fill="#94a3b8" text-anchor="middle">AI-Drone 4K</text>
+<text x="572" y="440" font-family="'Segoe UI',Arial,sans-serif" font-size="10" fill="#64748b" text-anchor="end">SokolykOff Shop</text>
+</svg>

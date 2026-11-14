@@ -1,0 +1,36 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+
+{% block content %}
+  <div class="Middle Middle_top">
+    <div class="Middle-top">
+      <div class="wrap">
+        <div class="Middle-header">
+          <h1 class="Middle-title">О платформе SokolykOff Shop</h1>
+          <ul class="breadcrumbs Middle-breadcrumbs">
+            <li class="breadcrumbs-item"><a href="/">Главная</a></li>
+            <li class="breadcrumbs-item breadcrumbs-item_current"><span>О платформе</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="Section">
+      <div class="wrap">
+        <article class="Article">
+          <h2>SokolykOff Shop — E-Commerce нового поколения (2026)</h2>
+          <p><strong>SokolykOff Shop</strong> — это специализированный маркетплейс компьютерного железа, кастомных механических клавиатур и оборудования для работы с искусственным интеллектом.</p>
+          <h3>Ключевые технологические преимущества платформы:</h3>
+          <ul>
+            <li><strong>Гибридный ИИ-поиск:</strong> понимает естественные запросы покупателей, исправляет раскладку клавиатуры на лету и подбирает устройства по смыслу.</li>
+            <li><strong>Нейросетевой анализ отзывов:</strong> автоматически агрегирует мнения реальных покупателей, выделяя главные плюсы, минусы и вердикт по каждому товару.</li>
+            <li><strong>Встроенный AI-Консультант:</strong> интерактивный помощник в правом нижнем углу экрана, который подбирает товары под ваш бюджет прямо из актуальной базы склада.</li>
+            <li><strong>Надежная архитектура:</strong> модульный бэкенд на Django REST, асинхронные очереди Celery + Redis, механизм мягкого удаления данных (Soft Delete).</li>
+          </ul>
+          <div style="margin-top: 30px;">
+            <a class="btn btn_primary" href="/catalog/">Перейти в каталог</a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+{% endblock %}

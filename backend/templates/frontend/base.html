@@ -1,0 +1,566 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <title>SokolykOff Shop — AI E-Commerce 2026</title>
+  <meta name="description" content="SokolykOff Shop — маркетплейс гаджетов и ИИ-оборудования">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+  <link href="{% static 'frontend/favicon.ico' %}" rel="shortcut icon">
+  <link rel="stylesheet" href="{% static 'frontend/assets/css/fonts.css' %}">
+  <link rel="stylesheet" href="{% static 'frontend/assets/css/basic.css' %}">
+  <link rel="stylesheet" href="{% static 'frontend/assets/css/extra.css' %}">
+  <script src="/static/frontend/assets/plg/vue.global.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="{% static 'frontend/assets/plg/CountDown/countdown.js' %}"></script>
+
+  <script defer src="{% static 'frontend/assets/js/app.js' %}"></script>
+  <script defer src="{% static 'frontend/assets/plg/jQuery/jquery-3.5.0.slim.min.js' %}"></script>
+  <script defer src="{% static 'frontend/assets/plg/form/jquery.form.js' %}"></script>
+  <script defer src="{% static 'frontend/assets/plg/form/jquery.maskedinput.min.js' %}"></script>
+  <script defer src="{% static 'frontend/assets/plg/range/ion.rangeSlider.min.js' %}"></script>
+  <script defer src="{% static 'frontend/assets/plg/Slider/slick.min.js' %}"></script>
+  <script defer src="{% static 'frontend/assets/js/scripts.js' %}"></script>
+
+  <link rel="stylesheet" href="{% static 'shop/shop.css' %}">
+  <script defer src="{% static 'shop/images.js' %}"></script>
+  <script defer src="{% static 'shop/ai-widget.js' %}"></script>
+  <style>
+    /* Убираем старые полосатые линии из 90-х по всему сайту */
+    .Section-header, .Sort, .Pagination, .ProductCard-header, .ProductCard-cart, .ProductCard-footer, .Article-section + .Article-section {
+      background-image: none !important;
+    }
+    .Section-header {
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 14px;
+      margin-bottom: 32px !important;
+    }
+    .Section-title {
+      background: transparent !important;
+      color: #0f172a !important;
+      font-weight: 800 !important;
+      letter-spacing: 0.5px !important;
+    }
+    body.Site {
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+
+    /* Современная шапка 2026 */
+    .sk-header {
+      background: #0b0f19;
+      border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    }
+    .sk-topbar {
+      background: #060911;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      padding: 8px 0;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .sk-topbar-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .sk-topbar a {
+      color: #cbd5e1;
+      text-decoration: none;
+      border: none !important;
+      margin-left: 18px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .sk-topbar a:hover { color: #38bdf8; }
+
+    .sk-mainbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 0;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .sk-brand {
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      border: none !important;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sk-badge {
+      font-size: 11px;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #38bdf8;
+      -webkit-text-fill-color: #38bdf8;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-weight: 700;
+    }
+
+    /* Категории и Поиск в одной линии */
+    .CategoriesButton {
+      width: auto !important;
+      min-width: 190px;
+      background: #1e293b !important;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+    }
+    .CategoriesButton-title {
+      padding: 12px 42px 12px 18px !important;
+      font-size: 13px !important;
+      font-weight: 700 !important;
+    }
+    .CategoriesButton-content {
+      border-radius: 0 0 12px 12px;
+      border: 1px solid #cbd5e1 !important;
+      box-shadow: 0 16px 32px rgba(0,0,0,0.2);
+      min-width: 260px;
+    }
+
+    .sk-search-box {
+      flex: 1;
+      min-width: 280px;
+    }
+    .sk-search-form {
+      display: flex;
+      background: #1e293b;
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .sk-search-form:focus-within {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+    }
+    .sk-search-input {
+      flex: 1;
+      background: transparent !important;
+      border: none !important;
+      color: #fff !important;
+      padding: 10px 18px !important;
+      min-height: 44px !important;
+      font-size: 14px !important;
+    }
+    .sk-search-btn {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: #fff;
+      border: none;
+      padding: 0 24px;
+      font-weight: 700;
+      font-size: 13px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .sk-search-btn:hover { opacity: 0.92; }
+
+    .sk-nav-links {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .sk-nav-links a {
+      color: #e2e8f0;
+      font-weight: 600;
+      font-size: 14px;
+      border: none !important;
+      transition: color 0.2s;
+    }
+    .sk-nav-links a:hover { color: #38bdf8; }
+
+    .sk-cart-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 8px 16px;
+      border-radius: 12px;
+      color: #fff !important;
+      font-weight: 700;
+    }
+    .sk-cart-badge {
+      background: #38bdf8;
+      color: #0f172a;
+      border-radius: 20px;
+      padding: 2px 8px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .sk-chips-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 0 0 12px 0;
+    }
+    .sk-chip {
+      background: rgba(255,255,255,0.06);
+      color: #cbd5e1 !important;
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.12) !important;
+      transition: all 0.2s;
+    }
+    .sk-chip:hover {
+      background: #38bdf8;
+      color: #0f172a !important;
+      border-color: #38bdf8 !important;
+    }
+
+    .Card {
+      border-radius: 16px !important;
+      border: 1px solid #e2e8f0 !important;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04) !important;
+      transition: transform 0.22s ease, box-shadow 0.22s ease !important;
+    }
+    .Card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 14px 28px rgba(15, 23, 42, 0.1) !important;
+    }
+
+    /* Современный Подвал 2026 */
+    .sk-footer {
+      background: #060911;
+      color: #94a3b8;
+      margin-top: 70px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      font-size: 14px;
+    }
+    .sk-footer-perks {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      padding: 36px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .sk-perk {
+      background: #0f172a;
+      border: 1px solid rgba(255,255,255,0.06);
+      padding: 18px 20px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .sk-perk-icon {
+      font-size: 26px;
+    }
+    .sk-perk-title {
+      color: #f8fafc;
+      font-weight: 700;
+      font-size: 14px;
+      display: block;
+    }
+    .sk-footer-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
+      gap: 32px;
+      padding: 44px 0;
+    }
+    @media (max-width: 900px) {
+      .sk-footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .sk-footer-heading {
+      color: #f8fafc;
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 16px;
+      display: block;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+    .sk-footer-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .sk-footer-list li { margin-bottom: 10px; }
+    .sk-footer-list li:after { display: none; }
+    .sk-footer-list a {
+      color: #94a3b8;
+      border: none !important;
+      transition: color 0.2s;
+    }
+    .sk-footer-list a:hover { color: #38bdf8; }
+    .sk-tech-pill {
+      display: inline-block;
+      background: #1e293b;
+      color: #38bdf8;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 8px;
+      margin: 0 6px 6px 0;
+      font-weight: 600;
+    }
+    .sk-footer-bottom {
+      background: #030509;
+      padding: 20px 0;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      font-size: 13px;
+    }
+
+    .sk-header { position: relative !important; }
+    .sk-mainbar {
+      display: grid !important;
+      grid-template-columns: auto auto 1fr auto auto;
+      align-items: center;
+      gap: 18px;
+      padding: 16px 0;
+    }
+    @media (max-width: 1100px) {
+      .sk-mainbar { grid-template-columns: 1fr; }
+    }
+    .sk-search-form {
+      display: flex !important;
+      align-items: stretch;
+      width: 100%;
+      background: #1e293b;
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .sk-search-input {
+      flex: 1 1 auto !important;
+      width: 100% !important;
+      min-width: 120px !important;
+      background: transparent !important;
+      border: none !important;
+      color: #fff !important;
+      padding: 0 16px !important;
+      height: 44px !important;
+      min-height: 44px !important;
+      font-size: 14px !important;
+      margin: 0 !important;
+    }
+    .sk-search-btn {
+      flex: 0 0 auto !important;
+      min-width: 105px !important;
+      white-space: nowrap !important;
+      background: linear-gradient(135deg, #0284c7, #2563eb) !important;
+      color: #fff !important;
+      border: none !important;
+      padding: 0 22px !important;
+      font-weight: 700 !important;
+      font-size: 13px !important;
+      cursor: pointer;
+    }
+    .sk-cart-pill {
+      display: inline-flex !important;
+      align-items: center;
+      gap: 10px;
+      white-space: nowrap;
+      background: #1e293b !important;
+      border: 1px solid rgba(56, 189, 248, 0.4) !important;
+      padding: 9px 16px !important;
+      border-radius: 12px;
+      color: #f8fafc !important;
+      font-size: 14px;
+    }
+    .sk-cart-badge {
+      background: #38bdf8;
+      color: #0f172a;
+      border-radius: 8px;
+      padding: 2px 9px;
+      font-size: 12px;
+      font-weight: 900;
+    }
+    /* Современная CSS Grid сетка карточек без обрезания цен */
+    .Cards {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
+      gap: 24px !important;
+      margin: 0 !important;
+      width: 100% !important;
+    }
+    .Cards .Card {
+      width: 100% !important;
+      max-width: none !important;
+      min-width: 0 !important;
+      margin: 0 !important;
+      height: auto !important;
+      background: #fff !important;
+      border-radius: 16px !important;
+      padding: 20px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: space-between !important;
+    }
+  </style>
+</head>
+<body class="Site" id="site">
+  <header class="sk-header">
+    <div class="sk-topbar">
+      <div class="wrap sk-topbar-inner">
+        <div>⚡ Платформа ИИ-коммерции <strong>SokolykOff Shop</strong> • Экспресс-доставка заказов от $2000 бесплатно</div>
+        <div>
+          {% if user.is_authenticated %}
+            <a href="/account/">👤 {{ user.username }} (Личный кабинет)</a>
+            <a href="/profile/">⚙️ Настройки</a>
+            <a href="#" @click.prevent="signOut()">Выйти</a>
+          {% else %}
+            <a href="/sign-in/">🔑 Войти</a>
+            <a href="/sign-up/">Регистрация</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="wrap">
+      <div class="sk-mainbar">
+        <a class="sk-brand" href="/">SokolykOff Shop <span class="sk-badge">AI 2026</span></a>
+
+        <div class="CategoriesButton">
+          <div class="CategoriesButton-title">
+            <div class="CategoriesButton-icon"><img src="{% static 'frontend/assets/img/icons/allDep.svg' %}" alt="allDep"/></div>
+            <span class="CategoriesButton-text">Все категории</span>
+            <div class="CategoriesButton-arrow"></div>
+          </div>
+          <div class="CategoriesButton-content">
+            <div class="CategoriesButton-link" v-for="category in categories">
+              <a :href="`/catalog/${category.id}`">
+                <div class="CategoriesButton-icon"><img :src="category.image.src" :alt="category.image.alt"/></div>
+                <span class="CategoriesButton-text">${ category.title }$</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="sk-search-box">
+          <form class="sk-search-form" @submit.prevent="search">
+            <input class="sk-search-input" id="query" name="query" type="text" autocomplete="off" v-model="searchText" placeholder="Умный ИИ-поиск: «товары до 300», «ноутбук до 700», «тихая клава»..."/>
+            <button class="sk-search-btn" type="submit">Найти</button>
+          </form>
+        </div>
+
+        <nav class="sk-nav-links">
+          <a href="/catalog/">Каталог</a>
+          <a href="/sale/" style="color:#f87171;">🔥 Акции -20%</a>
+          <a href="/about/">О платформе</a>
+          <a class="sk-cart-pill" href="/cart/">
+            <span>🛒 Корзина:</span> <span class="sk-cart-badge">${basketCount.count}$ шт.</span> <span style="color:#38bdf8;font-weight:800;">$${basketCount.price}$</span>
+          </a>
+        </nav>
+      </div>
+
+      <div class="sk-chips-bar">
+        <span style="color:#64748b;font-size:12px;font-weight:600;">🤖 Умные фильтры:</span>
+        <a class="sk-chip" href="/catalog/?filter=товары до 200">💵 Товары до $200</a>
+        <a class="sk-chip" href="/catalog/?filter=товары до 350">💎 До $350</a>
+        <a class="sk-chip" href="/catalog/?filter=ноутбук до 700">💻 Ноутбуки до $700</a>
+        <a class="sk-chip" href="/catalog/?filter=тихая для работы ночью">⌨️ Тихий сетап для ночи</a>
+        <a class="sk-chip" href="/catalog/?filter=нейросети rtx">🚀 Ускорители ИИ</a>
+      </div>
+    </div>
+  </header>
+
+  {% block content %}{% endblock %}
+
+  <!-- AI-консультант SokolykOFF (логика: static/shop/ai-widget.js) -->
+  <button class="sk-ai-fab" id="skAiFab" type="button" aria-controls="skAiModal" aria-expanded="false">🤖 AI-Подбор</button>
+  <div class="sk-ai-modal" id="skAiModal" role="dialog" aria-label="AI-консультант SokolykOFF">
+    <div class="sk-ai-header">
+      <div><strong><span class="sk-ai-dot"></span>SokolykOFF AI-консультант</strong><small>Подбор только из товаров в наличии под ваш бюджет</small></div>
+      <button class="sk-ai-close" id="skAiClose" type="button" aria-label="Закрыть">✕</button>
+    </div>
+    <div class="sk-ai-body" id="skAiBody">
+      <div class="sk-ai-msg sk-ai-msg--bot">Привет! Напишите задачу и бюджет, например <em>«тихая клавиатура до 200$»</em> — или выберите быстрый запрос ниже.</div>
+    </div>
+    <div class="sk-ai-chips" id="skAiChips"></div>
+    <div class="sk-ai-footer">
+      <input type="text" id="skAiInput" class="sk-ai-input" maxlength="200" autocomplete="off" placeholder="Что ищете и на какой бюджет?"/>
+      <button class="sk-ai-send" id="skAiSend" type="button" aria-label="Отправить">➤</button>
+    </div>
+  </div>
+
+  <footer class="sk-footer">
+    <div class="wrap">
+      <div class="sk-footer-perks">
+        <div class="sk-perk">
+          <span class="sk-perk-icon">🚀</span>
+          <div><span class="sk-perk-title">Экспресс-логистика</span>Доставка по РФ и СНГ со склада</div>
+        </div>
+        <div class="sk-perk">
+          <span class="sk-perk-icon">🤖</span>
+          <div><span class="sk-perk-title">AI-Подбор и Аналитика</span>Умный поиск по бюджету и смыслу</div>
+        </div>
+        <div class="sk-perk">
+          <span class="sk-perk-icon">🛡️</span>
+          <div><span class="sk-perk-title">Гарантия 24 месяца</span>Официальная поддержка SokolykOFF Care</div>
+        </div>
+        <div class="sk-perk">
+          <span class="sk-perk-icon">⚡</span>
+          <div><span class="sk-perk-title">Celery Async Pay</span>Мгновенный процессинг транзакций</div>
+        </div>
+      </div>
+
+      <div class="sk-footer-grid">
+        <div>
+          <a class="sk-brand" href="/" style="margin-bottom:14px;">SokolykOff Shop</a>
+          <p style="line-height:1.6;color:#94a3b8;">Современная e-commerce платформа 2026 года для разработчиков, ML-инженеров и геймеров. 28 отборных позиций в 4 категориях с честной ИИ-выжимкой отзывов.</p>
+          <div style="margin-top:14px;color:#22c55e;font-weight:600;font-size:13px;">● Все сервисы и очереди Celery активны</div>
+        </div>
+        <div>
+          <span class="sk-footer-heading">Разделы магазина</span>
+          <ul class="sk-footer-list">
+            <li><a href="/catalog/">Каталог (28 товаров)</a></li>
+            <li><a href="/sale/">🔥 Акции и скидки (-20%)</a></li>
+            <li><a href="/cart/">Корзина покупок</a></li>
+            <li><a href="/account/">Личный кабинет</a></li>
+            <li><a href="/profile/">Настройки и безопасность</a></li>
+          </ul>
+        </div>
+        <div>
+          <span class="sk-footer-heading">Стек платформы</span>
+          <div>
+            <span class="sk-tech-pill">Python 3.12</span>
+            <span class="sk-tech-pill">Django REST</span>
+            <span class="sk-tech-pill">Vue 3</span>
+            <span class="sk-tech-pill">Celery + Redis</span>
+            <span class="sk-tech-pill">SoftDelete ORM</span>
+            <span class="sk-tech-pill">Hybrid AI Search</span>
+          </div>
+          <ul class="sk-footer-list" style="margin-top:12px;">
+            <li><a href="/api/health/">JSON Healthcheck API</a></li>
+            <li><a href="/admin/">Админ-панель Jazzmin</a></li>
+          </ul>
+        </div>
+        <div>
+          <span class="sk-footer-heading">Разработчик</span>
+          <p style="line-height:1.6;">
+            <strong>Денис Науменко</strong><br>
+            Бренд: SokolykOFFf Ecosystem<br>
+            Email: <a href="mailto:naumenko.denis.v@gmail.com" style="color:#38bdf8;">naumenko.denis.v@gmail.com</a>
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="sk-footer-bottom">
+      <div class="wrap" style="display:flex;justify-content:space-between;width:100%;">
+        <div>© 2026 SokolykOff Shop. Все права защищены.</div>
+        <div>Принимаем карты Мир / Visa / Mastercard / СБП</div>
+      </div>
+    </div>
+  </footer>
+
+  {% block mixins %}{% endblock %}
+</body>
+</html>

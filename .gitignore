@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+# Окружение и секреты
+.env
+venv/
+.venv/
+# Локальные БД и артефакты
+db.sqlite3
+test_db.sqlite3
+backend/staticfiles/
+backend/media/avatars/
+.DS_Store
+
+*.sqlite3*
+*.db*
+.env.*
+!.env.example
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+
+# Private database exports and backups
+data-export*.json
+*.dump
+*.backup

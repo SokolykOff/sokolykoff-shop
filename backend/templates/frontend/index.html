@@ -1,0 +1,108 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="Middle">
+  <!-- Современный Hero-блок 2026 -->
+  <div style="background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 55%,#0284c7 100%);color:#fff;padding:56px 0;margin-bottom:40px;">
+    <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:30px;">
+      <div style="max-width:640px;">
+        <span style="background:rgba(56,189,248,0.2);color:#38bdf8;padding:6px 14px;border-radius:20px;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:1px;">
+          ⚡ Коллекция 2026 года • 28 позиций на складе
+        </span>
+        <h1 style="font-size:40px;font-weight:900;margin:18px 0 14px;line-height:1.15;color:#fff;">
+          Железо для ИИ, кодинга и киберспорта в SokolykOff Shop
+        </h1>
+        <p style="font-size:17px;color:#cbd5e1;line-height:1.6;margin-bottom:26px;">
+          Испытайте умный поиск по бюджету (попробуйте ввести <em>«товары до 300»</em>), честную нейросетевую выжимку отзывов и мгновенную оплату через Celery.
+        </p>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;">
+          <a href="/catalog/" class="btn btn_primary" style="border-radius:12px;padding:12px 28px;font-weight:700;">Смотреть весь каталог (28)</a>
+          <a href="/sale/" class="btn btn_danger" style="border-radius:12px;padding:12px 28px;font-weight:700;">🔥 Акции -20%</a>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;min-width:280px;">
+        <div style="background:rgba(255,255,255,0.08);backdrop-filter:blur(10px);padding:18px;border-radius:16px;border:1px solid rgba(255,255,255,0.12);">
+          <div style="font-size:28px;font-weight:900;color:#38bdf8;">28</div>
+          <div style="font-size:13px;color:#cbd5e1;">Отборных гаджетов в 4 категориях</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.08);backdrop-filter:blur(10px);padding:18px;border-radius:16px;border:1px solid rgba(255,255,255,0.12);">
+          <div style="font-size:28px;font-weight:900;color:#4ade80;">$29–$2450</div>
+          <div style="font-size:13px;color:#cbd5e1;">Честный фильтр под любой бюджет</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.08);backdrop-filter:blur(10px);padding:18px;border-radius:16px;border:1px solid rgba(255,255,255,0.12);">
+          <div style="font-size:28px;font-weight:900;color:#f472b6;">AI RAG</div>
+          <div style="font-size:13px;color:#cbd5e1;">Анализ плюсов и минусов по отзывам</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.08);backdrop-filter:blur(10px);padding:18px;border-radius:16px;border:1px solid rgba(255,255,255,0.12);">
+          <div style="font-size:28px;font-weight:900;color:#facc15;">-20%</div>
+          <div style="font-size:13px;color:#cbd5e1;">Горячие скидки недели</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Популярные товары -->
+  <div class="Section">
+    <div class="wrap">
+      <header class="Section-header">
+        <h2 class="Section-title">🔥 Хиты продаж SokolykOff Shop</h2>
+        <a href="/catalog/" style="font-weight:700;color:#0284c7;">Смотреть все 28 товаров →</a>
+      </header>
+      <div class="Cards">
+        <div v-for="card in popularCards" class="Card" style="display:flex;flex-direction:column;justify-content:space-between;padding:20px;">
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:12px;">
+              <span style="color:#f59e0b;font-weight:700;">★ ${ card.rating }$ (${ card.reviews }$)</span>
+              <span v-if="card.freeDelivery" style="background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:10px;font-weight:600;">Беспл. доставка</span>
+            </div>
+            <a class="Card-picture" :href="`/product/${card.id}`" style="min-height:180px;max-height:180px;">
+              <img v-if="card.images.length > 0" :src="card.images[0].src" :alt="card.images[0].alt" style="max-height:170px;width:auto;object-fit:contain;border-radius:10px;"/>
+            </a>
+            <strong class="Card-title" style="font-size:16px;font-weight:700;margin-top:12px;min-height:44px;">
+              <a :href="`/product/${card.id}`" style="color:#0f172a;">${ card.title }$</a>
+            </strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid #f1f5f9;">
+            <span style="font-size:22px;font-weight:800;color:#0284c7;">$${ card.price }$</span>
+            <button class="btn btn_primary btn_sm" @click="addToBasket(card)" style="border-radius:10px;">В корзину</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Лимитированный тираж -->
+  <div class="Section" style="margin-top:50px;">
+    <div class="wrap">
+      <header class="Section-header">
+        <h2 class="Section-title">⚡ Лимитированная серия (Limited Edition)</h2>
+      </header>
+      <div class="Cards">
+        <div v-for="card in limitedCards.slice(0, 8)" class="Card" style="display:flex;flex-direction:column;justify-content:space-between;padding:20px;">
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:12px;">
+              <span style="background:#fef3c7;color:#b45309;padding:2px 8px;border-radius:10px;font-weight:700;">LIMITED</span>
+              <span style="color:#f59e0b;font-weight:700;">★ ${ card.rating }$</span>
+            </div>
+            <a class="Card-picture" :href="`/product/${card.id}`" style="min-height:180px;max-height:180px;">
+              <img v-if="card.images.length > 0" :src="card.images[0].src" :alt="card.images[0].alt" style="max-height:170px;width:auto;object-fit:contain;border-radius:10px;"/>
+            </a>
+            <strong class="Card-title" style="font-size:16px;font-weight:700;margin-top:12px;min-height:44px;">
+              <a :href="`/product/${card.id}`" style="color:#0f172a;">${ card.title }$</a>
+            </strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid #f1f5f9;">
+            <span style="font-size:22px;font-weight:800;color:#0284c7;">$${ card.price }$</span>
+            <button class="btn btn_primary btn_sm" @click="addToBasket(card)" style="border-radius:10px;">В корзину</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block mixins %}
+<script src="{% static 'frontend/assets/js/index.js' %}"></script>
+{% endblock %}

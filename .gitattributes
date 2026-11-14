@@ -1,0 +1,4 @@
+frontend-pkg/** linguist-vendored=true
+*.styl linguist-vendored=true
+backend/static/frontend/** linguist-vendored=true
+backend/templates/** linguist-documentation=true

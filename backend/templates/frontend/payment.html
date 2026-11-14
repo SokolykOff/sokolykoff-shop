@@ -1,0 +1,138 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+
+{% block content %}
+  <div class="Middle Middle_top">
+    <div class="Middle-top">
+      <div class="wrap">
+        <div class="Middle-header">
+          <h1 class="Middle-title">Оплата</h1>
+          <ul class="breadcrumbs Middle-breadcrumbs">
+            <li class="breadcrumbs-item"><a href="/">Home</a></li>
+            <li class="breadcrumbs-item breadcrumbs-item_current"><span>Оплата</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="Section">
+      <div class="wrap">
+        <form class="form Payment" @submit.prevent="submitPayment">
+          <div class="Payment-card">
+            <div class="form-group">
+              <label for="numero1" class="form-label">Номер карты
+                <input class="form-input Payment-bill"
+                       id="numero1"
+                       name="numero1"
+                       type="text"
+                       maxlength="19"
+                       placeholder="9999 9999 9999 9999"
+                       v-model="number"
+                       @input="number = $event.target.value.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim()"/>
+              </label>
+            </div>
+            <div class="form-group">
+              <label for="month" class="form-label">Месяц
+                <input class="form-input Payment-bill"
+                       id="month"
+                       name="month"
+                       type="text"
+                       maxlength="2"
+                       placeholder="12"
+                       v-model="month"
+                       @input="month = $event.target.value.replace(/\D/g, '').slice(0, 2)"/>
+              </label>
+            </div>
+            <div class="form-group">
+              <label for="year" class="form-label">Год
+                <input class="form-input Payment-bill"
+                       id="year"
+                       name="year"
+                       type="text"
+                       maxlength="2"
+                       placeholder="26"
+                       v-model="year"
+                       @input="year = $event.target.value.replace(/\D/g, '').slice(0, 2)"/>
+              </label>
+            </div>
+            <div class="form-group">
+              <label for="code" class="form-label">CVV
+                <input class="form-input Payment-bill"
+                       id="code"
+                       name="code"
+                       type="text"
+                       maxlength="3"
+                       placeholder="000"
+                       v-model="code"
+                       @input="code = $event.target.value.replace(/\D/g, '').slice(0, 3)"/>
+              </label>
+            </div>
+            <div class="form-group">
+              <label for="name" class="form-label">ФИО
+                <input class="form-input Payment-bill"
+                       id="name"
+                       name="name"
+                       type="text"
+                       placeholder="Иван Иванов"
+                       v-model="name"/>
+              </label>
+            </div>
+          </div>
+          <div class="Payment-pay">
+            <button class="btn btn_primary" type="submit">Оплатить</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+{% block mixins %}
+<script src="{% static 'frontend/assets/js/payment.js' %}"></script>
+<script>
+mix.methods.submitPayment = function() {
+  const orderId = location.pathname.startsWith('/payment/')
+    ? Number(location.pathname.replace('/payment/', '').replace('/', ''))
+    : null;
+
+  const cleanNum = (this.number || '').replace(/\D/g, '');
+  const cleanMonth = (this.month || '').replace(/\D/g, '');
+  const cleanYear = (this.year || '').replace(/\D/g, '');
+  const cleanCode = (this.code || '').replace(/\D/g, '');
+  const cleanName = (this.name || '').trim();
+
+  if (cleanNum.length !== 16) {
+    alert('Ошибка: номер карты должен состоять ровно из 16 цифр!');
+    return;
+  }
+  const monthInt = Number(cleanMonth);
+  if (cleanMonth.length !== 2 || monthInt < 1 || monthInt > 12) {
+    alert('Ошибка: укажите корректный месяц от 01 до 12!');
+    return;
+  }
+  if (cleanYear.length !== 2) {
+    alert('Ошибка: укажите год из 2 цифр (например, 26)!');
+    return;
+  }
+  if (cleanCode.length !== 3) {
+    alert('Ошибка: CVV код должен состоять ровно из 3 цифр!');
+    return;
+  }
+  if (cleanName.length < 2) {
+    alert('Ошибка: укажите ФИО владельца карты!');
+    return;
+  }
+
+  this.postData(`/api/payment/${orderId}/`, {
+    name: cleanName,
+    number: cleanNum,
+    year: cleanYear,
+    month: cleanMonth,
+    code: cleanCode
+  }).then(() => {
+    alert('Успешная оплата');
+    location.assign('/');
+  }).catch(() => {
+    alert('Ошибка при оплате: платежная система отклонила карту (номер не должен заканчиваться на 0)');
+  });
+};
+</script>
+{% endblock %}
