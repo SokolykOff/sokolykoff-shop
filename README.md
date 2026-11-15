@@ -1,127 +1,91 @@
-﻿# SokolykOff Shop — E-Commerce Backend (Django 5.2 + PostgreSQL 17 + Celery/Redis)
+﻿# SokolykOff Shop
 
-[![PostgreSQL CI](https://github.com/SokolykOff/sokolykoff-shop/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/SokolykOff/sokolykoff-shop/actions/workflows/ci.yml)
-![Python 3.12](https://img.shields.io/badge/python-3.12-3776AB?logo=python&logoColor=white)
-![Django 5.2](https://img.shields.io/badge/Django-5.2-092E20?logo=django&logoColor=white)
-![PostgreSQL 17](https://img.shields.io/badge/PostgreSQL-17-4169E1?logo=postgresql&logoColor=white)
-![Celery + Redis](https://img.shields.io/badge/Celery-Redis_7-37814A?logo=celery&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+[![CI](https://github.com/SokolykOff/sokolykoff-shop/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/SokolykOff/sokolykoff-shop/actions/workflows/ci.yml)
+![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB)
+![Django 5.2](https://img.shields.io/badge/Django-5.2-092E20)
+![PostgreSQL 17](https://img.shields.io/badge/PostgreSQL-17-4169E1)
+![Celery + Redis](https://img.shields.io/badge/Celery-Redis%207-DC382D)
+![Vue 3](https://img.shields.io/badge/Vue-3-4FC08D)
+![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED)
 
-Backend интернет-магазина электроники с транзакционным резервированием складских остатков в PostgreSQL, фоновой обработкой заказов через Celery/Redis и гибридным AI-поиском с детерминированным локальным фоллбэком.
+Интернет-магазин электроники на Django и PostgreSQL с каталогом, корзиной и оформлением заказов. Основной сценарий проекта — резервирование остатков, когда несколько покупателей одновременно заказывают один товар. Оплата симулируется задачей Celery, витрина работает на Vue 3 в шаблонах Django.
 
 ![Архитектура SokolykOff Shop](docs/architecture.svg)
 
----
+## Архитектура
 
-## 1. Технологический стек и архитектура
+| Компонент | Назначение |
+| --- | --- |
+| Django | JSON API каталога, корзины, заказов и профиля. Схема OpenAPI описана в `backend/mysite/api_docs.py` |
+| PostgreSQL | Каталог, заказы, пользователи и сессии. Транзакции, блокировки строк и ограничения целостности |
+| Celery и Redis | Redis передаёт задачи и хранит их результаты. Celery выполняет симуляцию оплаты и обновляет заказ |
+| Vue 3 и Django Templates | Витрина, корзина, профиль и виджет консультанта |
+| Gunicorn и WhiteNoise | Запуск веб-приложения и раздача собранной статики |
 
-| Компонент | Технология | Инженерное назначение |
-|---|---|---|
-| **HTTP API & Static** | Django 5.2, Gunicorn, WhiteNoise | Обработка JSON API каталога, заказов и авторизации; раздача собранного фронтенда (`frontend-pkg`) |
-| **База данных** | PostgreSQL 17 (`READ COMMITTED`) | Транзакционное хранение каталога, пользователей и заказов; строгие ограничения целостности на уровне СУБД |
-| **Очередь задач** | Celery + Redis 7 | Асинхронная постобработка заказов после коммита транзакции (`transaction.on_commit`), хранение статуса задач в Redis |
-| **AI & Поиск** | OpenAI-compatible API + Rule-Based Engine | Парсинг бюджета из естественного языка, исправление раскладки и опечаток, AI-подбор и кэшируемая сводка по отзывам |
-| **Контейнеризация и CI** | Docker Compose, GitHub Actions | Выделенный `migrate`-контейнер с ожиданием `pg_isready`, прогон тестов на PostgreSQL 17 и полный `docker-smoke` |
+Поиск извлекает бюджет из запроса, исправляет раскладку и опечатки, подбирает товары из каталога. LLM объясняет выбор и формирует сводки отзывов. Если ключ не задан или провайдер недоступен, приложение формирует ответ локально.
 
----
+## Заказы и целостность данных
 
-## 2. Гарантии транзакционности и надёжности (Safety & Concurrency Guarantees)
+| Сценарий | Реализация |
+| --- | --- |
+| Два покупателя заказывают последний товар | `select_for_update()` блокирует строки товаров до конца транзакции. Остаток проверяется под блокировкой. Если товара уже недостаточно, API возвращает `409` |
+| Корзины содержат одни и те же товары | Строки блокируются в порядке ID. Единый порядок снижает риск дедлоков |
+| Заказ не удалось оформить | Создание заказа и изменение остатков выполняются в одной транзакции |
+| Отмена пришла повторно | Сервис блокирует строку заказа и проверяет статус перед возвратом остатков |
+| Задача оплаты пришла повторно | Состояние заказа проверяется под блокировкой. Повторная обработка оплаченного заказа не увеличивает счётчик покупок |
+| Данные изменили напрямую в БД | Ограничения PostgreSQL защищают от отрицательных остатков и сумм, недопустимых цен и количества, а также дублей товара в заказе |
 
-| Механизм | Реализация в коде | От какого риска защищает |
-|---|---|---|
-| **Row-Level Locking & Deadlock Prevention** | `select_for_update()` внутри `transaction.atomic()` с предварительной сортировкой ID товаров по возрастанию (`ORDER BY id`) | Исключает гонки списания остатков (overselling) при параллельных покупках и взаимные блокировки (deadlocks) при пересекающихся корзинах |
-| **Database-Level Constraints** | `CheckConstraint` (`stock >= 0`, `total_price >= 0`, `quantity > 0`), `UniqueConstraint(order, product)`, индекс `(user_id, created_at DESC)` | Гарантирует невозможность ухода остатков в минус или дублирования позиций даже при прямом обращении к БД |
-| **Idempotent Order Cancellation** | Блокировка строки заказа через `select_for_update()`, проверка текущего статуса и атомарный возврат единиц товара в `stock` | Повторный или параллельный запрос отмены не может начислить товар на склад дважды |
-| **Post-Commit Celery Dispatch** | Вызов `.delay()` обёрнут в `transaction.on_commit()` в `orders/services.py` | Celery-воркер гарантированно читает уже зафиксированный в PostgreSQL заказ, исключая гонку между коммитом и чтением |
-| **Atomic Purchase Counters** | Обновление популярности товара через SQL-выражение `F("purchases_count") + quantity` в `orders/tasks.py` | Параллельные воркеры не затирают счётчик покупок при одновременном выполнении задач |
-| **Resilient AI Fallback** | Таймаут 2.5 с, лимит длины промпта, кэширование сводок до изменения отзывов и детерминированный локальный ранжировщик | Витрина и умный подбор продолжают работать без задержек и ошибок даже без `LLM_API_KEY` или при недоступности внешнего LLM-провайдера |
+Код резервирования и отмены находится в [`backend/orders/services.py`](backend/orders/services.py), задача оплаты — в [`backend/orders/tasks.py`](backend/orders/tasks.py).
 
----
+## Запуск
 
-## 3. Карта API эндпоинтов
+Нужны Docker и Docker Compose v2. Из корня репозитория скопируйте `backend/.env.example` в `backend/.env`. В PowerShell можно выполнить `Copy-Item backend/.env.example backend/.env`.
 
-| Метод | Эндпоинт | Назначение |
-|---|---|---|
-| `GET` | `/api/products/` | Список товаров с фильтрацией, поиском и пагинацией |
-| `GET` | `/api/products/<id>/` | Детальная карточка товара и список отзывов |
-| `POST` | `/api/products/<id>/reviews/` | Добавление или обновление отзыва (требует авторизации, 1 отзыв на товар от пользователя) |
-| `GET` | `/api/products/<id>/ai-summary/` | Кэшируемая AI-сводка плюсов, минусов и вердикта по отзывам товара |
-| `POST` | `/api/ai/recommend/` | Гибридный AI-подбор товаров по текстовому запросу и бюджету |
-| `POST` | `/api/auth/register/` | Регистрация пользователя |
-| `POST` | `/api/auth/login/` | Вход в сессию (защита от перебора паролей через Django cache) |
-| `POST` | `/api/auth/logout/` | Завершение сессии |
-| `GET` | `/api/auth/me/` | Профиль текущего пользователя |
-| `GET` | `/api/orders/` | История заказов пользователя |
-| `POST` | `/api/orders/` | Транзакционное создание заказа с резервированием остатков и постановкой Celery-задачи |
-| `POST` | `/api/orders/<id>/cancel/` | Идемпотентная отмена заказа с возвратом товара на склад |
-| `GET` | `/api/orders/tasks/<task_id>/` | Проверка статуса фоновой задачи заказа в Redis (доступно только владельцу заказа) |
-
----
-
-## 4. Структура проекта
-
-```text
-sokolykoff-shop/
-├── backend/
-│   ├── mysite/              # Настройки Django, PostgreSQL, Celery, безопасности и логов
-│   ├── catalog/             # Модели каталога, гибридный поиск, AI-сервис и API товаров
-│   ├── orders/              # Транзакционный сервис заказов (services.py), Celery-задачи и тесты
-│   ├── fixtures.json        # Демонстрационные данные каталога
-│   ├── requirements.txt     # Зависимости приложения
-│   └── requirements-lock.txt
-├── frontend-pkg/            # Пакет со статикой клиентского интерфейса (Vue 3 SPA)
-├── docs/
-│   └── architecture.svg     # Схема архитектуры
-├── Dockerfile               # Непривилегированный образ (UID 10001) с Gunicorn
-├── docker-compose.yml       # PostgreSQL 17, Redis 7, migrate, web и Celery worker
-└── .github/workflows/ci.yml # Пайплайн: PostgreSQL 17 тесты + Docker Compose smoke-тест
+```
+docker compose up -d --build --wait --wait-timeout 180
+docker compose exec web python manage.py loaddata fixtures.json
 ```
 
----
+Сервис `migrate` применяет миграции, а `media-init` подготавливает общий том для медиафайлов. Фикстуру загружайте один раз в пустую демонстрационную базу. Для проверки оплаты используйте тестовые данные.
 
-## 5. Быстрый старт
+- Витрина — [localhost:8000](http://localhost:8000/)
+- Админка — [localhost:8000/admin/](http://localhost:8000/admin/)
+- Swagger UI — [localhost:8000/api/docs/](http://localhost:8000/api/docs/)
+- Проверка доступности — [localhost:8000/api/health/](http://localhost:8000/api/health/)
 
-### Запуск через Docker Compose (рекомендуется)
+Логи Django и Celery доступны через `docker compose logs -f web celery`. Команда `docker compose down` останавливает сервисы и сохраняет данные в томах.
 
-```bash
-docker compose up --build -d
+## API
+
+| Метод | Маршрут | Назначение |
+| --- | --- | --- |
+| GET | `/api/catalog/` | Каталог с фильтрами, поиском и пагинацией |
+| GET | `/api/product/{id}/` | Карточка товара |
+| GET, POST | `/api/product/{id}/reviews/` | Просмотр и добавление отзывов |
+| GET, POST, DELETE | `/api/basket/` | Сессионная корзина |
+| GET, POST | `/api/orders/` | Список и создание заказов |
+| GET, POST | `/api/order/{id}/` | Просмотр и обновление заказа |
+| POST | `/api/payment/{id}/` | Запуск симуляции оплаты |
+| POST | `/api/sign-up/`, `/api/sign-in/`, `/api/sign-out/` | Регистрация, вход и выход |
+| GET, POST | `/api/profile/` | Просмотр и обновление профиля |
+| POST | `/api/ai-assistant/` | Подбор товаров по запросу и бюджету |
+| GET | `/api/health/` | Проверка доступности приложения и БД |
+
+Схема OpenAPI доступна по `/api/schema/`.
+
+## Тесты и CI
+
+| Проверка | Что проверяет |
+| --- | --- |
+| `test` | Миграции, загрузку фикстур, сборку статики и тесты Django на PostgreSQL 17 |
+| `docker-smoke` | Сборку образов, запуск Compose, HTTP-ответы и выполнение задачи через Redis и отдельный процесс Celery |
+
+Автотесты покрывают конкурентное резервирование остатков, блокировку отдельных строк, ограничения БД, повторную отмену и оплату, авторизацию, поиск и локальный ответ при сбое LLM.
+
+Чтобы запустить полный набор тестов в поднятом Compose:
+
+```
+docker compose exec -e CELERY_TASK_ALWAYS_EAGER=True web python manage.py test --noinput
 ```
 
-Сервис `migrate` дождётся готовности PostgreSQL 17, применит миграции и загрузит демонстрационные данные каталога, после чего запустятся `web` (Gunicorn + WhiteNoise) и `worker` (Celery).
-
-* Приложение: `http://localhost:8000`
-* Проверка логов: `docker compose logs -f web worker`
-* Остановка: `docker compose down`
-
-### Локальная разработка и запуск тестов
-
-```bash
-# 1. Поднять PostgreSQL 17 и Redis 7
-docker compose up -d db redis
-
-# 2. Установить зависимости (из каталога backend)
-cd backend
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install -r requirements-lock.txt
-
-# 3. Задать подключение к БД
-export POSTGRES_DB=sokolykoff_shop
-export POSTGRES_USER=sokolykoff
-export POSTGRES_PASSWORD=local-dev-password
-export POSTGRES_HOST=127.0.0.1
-export POSTGRES_PORT=5432
-
-# 4. Применить миграции, загрузить каталог и запустить тесты
-python manage.py migrate
-python manage.py loaddata fixtures.json
-python manage.py test -v 2
-```
-
----
-
-## 6. Автотесты и CI
-
-GitHub Actions пайплайн (`.github/workflows/ci.yml`) автоматически проверяет каждый коммит в двух джобах:
-1. **`test` (PostgreSQL 17):** применение миграций, загрузка фикстур, `collectstatic --noinput` и полный набор тестов Django (`catalog` + `orders`), включая многопоточный тест конкурентной покупки последнего товара (`stock = 1`) и конкурентной отмены заказа через `Barrier`.
-2. **`docker-smoke`:** сборка production-образа, подъём всего стека через `docker compose`, проверка HTTP-ответов и сквозной прогон реальной фоновой задачи `web → Redis → Celery worker → Redis`.
+При запуске вне Docker устанавливайте зависимости из каталога `backend` командой `python -m pip install -r requirements-lock.txt`. Укажите в `backend/.env` параметры доступного PostgreSQL. Для подключения с хоста к контейнеру используйте `POSTGRES_HOST=127.0.0.1`. Полный набор тестов запускается из `backend` командой `python manage.py test --noinput`.
